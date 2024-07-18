@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { type NextServerSearchParams } from '@/types/searchParams'
 import { type Object } from '@/types/utils'
 
+import { normalizeString } from '@/utils/normalizeString'
 import { normalizeQueryParam } from '@/utils/queryUtils'
 
 import { SEARCH_KEY } from '@/constants/searchParams'
@@ -17,18 +18,14 @@ function matchesQuery<Entry extends Object>(
   value: Entry[keyof Entry],
   query: string,
 ): boolean {
-  const isStringValue = typeof value === 'string'
-  const isNumberValue = typeof value === 'number'
-
-  if (isStringValue) {
-    return value.toLowerCase().includes(query)
+  if (typeof value !== 'string' && typeof value !== 'number') {
+    return false
   }
 
-  if (isNumberValue) {
-    return value.toString().toLowerCase().includes(query)
-  }
+  const normalizedValue = normalizeString(String(value))
+  const normalizedQuery = normalizeString(query)
 
-  return false
+  return normalizedValue.includes(normalizedQuery)
 }
 
 export function useSearch<Entry extends Object>({
@@ -39,11 +36,11 @@ export function useSearch<Entry extends Object>({
   const normalizedQuery = normalizeQueryParam(searchParams, SEARCH_KEY)
 
   const searchResults = useMemo(() => {
-    const searchByKeys = Array.isArray(searchBy) ? searchBy : [searchBy]
-
     if (!normalizedQuery) {
       return entries
     }
+
+    const searchByKeys = Array.isArray(searchBy) ? searchBy : [searchBy]
 
     return entries.filter((entry) => {
       return searchByKeys.some((key) =>

@@ -30,6 +30,9 @@ export default defineConfig({
         },
       })
     },
-    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    specPattern: [
+      'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+      'cypress/unit/**/*.cy.{js,jsx,ts,tsx}',
+    ],
   },
 })
